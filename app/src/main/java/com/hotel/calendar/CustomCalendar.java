@@ -22,11 +22,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.openxu.calendar.MonthDayBean.Day.STATUS.STATUS_BEFORE;
-import static com.openxu.calendar.MonthDayBean.Day.STATUS.STATUS_CLICK;
-import static com.openxu.calendar.MonthDayBean.Day.STATUS.STATUS_OUT;
-import static com.openxu.calendar.MonthDayBean.Day.STATUS.STATUS_SELECT;
-import static com.openxu.calendar.MonthDayBean.Day.STATUS.STATUS_UNCLICK;
+import static com.hotel.calendar.MonthDayBean.Day.STATUS.STATUS_BEFORE;
+import static com.hotel.calendar.MonthDayBean.Day.STATUS.STATUS_CLICK;
+import static com.hotel.calendar.MonthDayBean.Day.STATUS.STATUS_OUT;
+import static com.hotel.calendar.MonthDayBean.Day.STATUS.STATUS_SELECT;
+import static com.hotel.calendar.MonthDayBean.Day.STATUS.STATUS_UNCLICK;
 
 /**
  * autour: ox

@@ -372,6 +372,8 @@ public class CustomCalendar extends View{
     }
 
 
+    boolean hasOut = false;  //是否有排满的
+
     private MonthDayBean.MonthBean monthBean;
     private Map<Integer, MonthDayBean.Day> map;
     public void setData(MonthDayBean.MonthBean monthBean){
@@ -418,7 +420,6 @@ public class CustomCalendar extends View{
         }else{
             //已经选中了开始日期
             if(dateEnd == null){
-                boolean hasOut = false;  //是否有排满的
                 //未选中结束日期
                 while (keyI.hasNext()){
                     MonthDayBean.Day day =map.get(keyI.next());
@@ -598,8 +599,10 @@ public class CustomCalendar extends View{
 
 
     public void setEmpty(boolean all){
-        if(all)
+        if(all) {
             dateStart = null;
+        }
+        hasOut = false;
         dateEnd = null;
         refreshStstus();
         invalidate();

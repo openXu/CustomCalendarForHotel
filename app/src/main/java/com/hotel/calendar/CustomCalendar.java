@@ -72,19 +72,20 @@ public class CustomCalendar extends View{
     private int columnWidth;       //每列宽度
     private int weekHeight, dayHeight, moneyHeight, oneHeight;
 
-    private Date monthDate; //当前的月份
+    private Date dateMonth; //当前的月份
+    private Date dateToday;
     private boolean isCurrentMonth;       //展示的月份是否是当前月
-    private Date today;
     private int currentDay;
-    private String startDay, endDay;
+
+    private Date dateStart, dateEnd;
 
     private int dayOfMonth;    //月份天数
     private int firstIndex;    //当月第一天位置索引
-    private int todayWeekIndex;//今天是星期几
     private int firstLineNum, lastLineNum; //第一行、最后一行能展示多少日期
     private int lineNum;      //日期行数
     private String[] WEEK_STR = new String[]{"日", "一", "二", "三", "四", "五", "六", };
 
+    private CalendarLayout layout;
 
     public CustomCalendar(Context context) {
         this(context, null);
@@ -107,6 +108,10 @@ public class CustomCalendar extends View{
 
         initCompute();
 
+    }
+
+    public void setParentLayout(CalendarLayout layout){
+        this.layout = layout;
     }
     private void initCompute(){
         mPaint = new Paint();
@@ -132,24 +137,23 @@ public class CustomCalendar extends View{
     /**设置月份*/
     private void setMonth(String Month){
         //设置的月份（2017年01月）
-        monthDate = CalendarUtil.str2Date(Month, CalendarUtil.FROMAT_MONTH);
+        dateMonth = CalendarUtil.str2Date(Month, CalendarUtil.FROMAT_MONTH);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        today = CalendarUtil.getDayDate(new Date());
+        dateToday = CalendarUtil.getDayDate(new Date());
         //获取今天是多少号
         currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-        todayWeekIndex = calendar.get(Calendar.DAY_OF_WEEK)-1;
 
         Date cM = CalendarUtil.str2Date(CalendarUtil.getMonthStr(new Date()), CalendarUtil.FROMAT_MONTH);
         //判断是否为当月
-        if(cM.getTime() == monthDate.getTime()){
+        if(cM.getTime() == dateMonth.getTime()){
             isCurrentMonth = true;
         }else{
             isCurrentMonth = false;
         }
-        Log.d(TAG, "设置月份："+monthDate+"   今天"+currentDay+"号, 是否为当前月："+isCurrentMonth);
-        calendar.setTime(monthDate);
+        Log.d(TAG, "设置月份："+dateMonth+"   今天"+currentDay+"号, 是否为当前月："+isCurrentMonth);
+        calendar.setTime(dateMonth);
         dayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         //第一行1号显示在什么位置（星期几）
         firstIndex = calendar.get(Calendar.DAY_OF_WEEK)-1;
@@ -166,7 +170,7 @@ public class CustomCalendar extends View{
             lineNum ++;
             lastLineNum = shengyu;
         }
-        Log.i(TAG, CalendarUtil.getMonthStr(monthDate)+"一共有"+dayOfMonth+"天,第一天的索引是："+firstIndex+"   有"+lineNum+
+        Log.i(TAG, CalendarUtil.getMonthStr(dateMonth)+"一共有"+dayOfMonth+"天,第一天的索引是："+firstIndex+"   有"+lineNum+
                 "行，第一行"+firstLineNum+"个，最后一行"+lastLineNum+"个");
     }
 
@@ -331,6 +335,18 @@ public class CustomCalendar extends View{
                             dayTextLeading, moneyTextLeading,
                             textStr, moneyStr);
 
+                    if(layout!=null){
+                        //判断如果是开始和结束日期，通知layout显示pop
+                        Date date = CalendarUtil.getDayDate(dayDate.getDate());
+                        if(dateStart.getTime() == date.getTime()) {
+                            Log.e(TAG, "显示开始气泡");
+                            layout.showPop(new PointF(left+columnWidth/2, top), 1);
+                        }
+                        if(dateEnd!=null&& dateEnd.getTime() == date.getTime()){
+                            Log.e(TAG, "显示结束气泡");
+                            layout.showPop(new PointF(left+columnWidth/2, top), 2);
+                        }
+                    }
                     break;
             }
 
@@ -379,12 +395,12 @@ public class CustomCalendar extends View{
     private void refreshStstus(){
         Log.e(TAG, "刷新数据");
         Iterator<Integer> keyI = map.keySet().iterator();
-        if(TextUtils.isEmpty(startDay)){
+        if(dateStart==null){
             Log.w(TAG, "未选中日期");
             while (keyI.hasNext()){
                 MonthDayBean.Day day =map.get(keyI.next());
                 Date date = CalendarUtil.getDayDate(day.getDate());
-                if(date.getTime() < today.getTime()){
+                if(date.getTime() < dateToday.getTime()){
                     //过期
                     day.setStatus(STATUS_BEFORE);
                     Log.w(TAG, day.getDate()+"过期");
@@ -400,24 +416,23 @@ public class CustomCalendar extends View{
                 }
             }
         }else{
-            Date startDate = CalendarUtil.getDayDate(startDay);
             //已经选中了开始日期
-            if(TextUtils.isEmpty(endDay)){
+            if(dateEnd == null){
                 boolean hasOut = false;  //是否有排满的
                 //未选中结束日期
                 while (keyI.hasNext()){
                     MonthDayBean.Day day =map.get(keyI.next());
                     Date date = CalendarUtil.getDayDate(day.getDate());
-                    if(date.getTime() < today.getTime()){
+                    if(date.getTime() < dateToday.getTime()){
                         //过期
                         day.setStatus(STATUS_BEFORE);
                         Log.w(TAG, day.getDate()+"过期");
                     }else{
-                        if(date.getTime() < startDate.getTime()){
+                        if(date.getTime() < dateStart.getTime()){
                             //未过期，但是在开始日期之前，不能点击
                             day.setStatus(STATUS_UNCLICK);
                             Log.w(TAG, day.getDate()+"在开始日期之前，不能点击");
-                        }else if(startDate.getTime() == date.getTime()){
+                        }else if(dateStart.getTime() == date.getTime()){
                             day.setStatus(STATUS_SELECT);
                             Log.e(TAG, day.getDate()+"是开始日期，选中");
                         }else{
@@ -440,23 +455,22 @@ public class CustomCalendar extends View{
                     }
                 }
             }else{
-                Date endDate = CalendarUtil.getDayDate(endDay);
                 while (keyI.hasNext()){
                     MonthDayBean.Day day =map.get(keyI.next());
                     Date date = CalendarUtil.getDayDate(day.getDate());
-                    if(date.getTime() < today.getTime()){
+                    if(date.getTime() < dateToday.getTime()){
                         //过期
                         day.setStatus(STATUS_BEFORE);
                         Log.w(TAG, day.getDate()+"过期");
                     }else{
-                        if(date.getTime() < startDate.getTime()){
+                        if(date.getTime() < dateStart.getTime()){
                             //未过期，但是在开始日期之前，不能点击
                             day.setStatus(STATUS_UNCLICK);
                             Log.w(TAG, day.getDate()+"在开始日期之前，不能点击");
-                        }else if(startDate.getTime() == date.getTime() || date.getTime() < endDate.getTime()){
+                        }else if(dateStart.getTime() == date.getTime() || date.getTime() < dateEnd.getTime()){
                             Log.e(TAG, day.getDate()+"在选中区域，选中");
                             day.setStatus(STATUS_SELECT);
-                        }else if(date.getTime() == endDate.getTime()) {
+                        }else if(date.getTime() == dateEnd.getTime()) {
                             Log.e(TAG, day.getDate()+"为结束日期，选中");
                             day.setStatus(STATUS_SELECT);
                         }else{
@@ -564,10 +578,10 @@ public class CustomCalendar extends View{
                 break;
             case STATUS_CLICK:
                 Log.e(TAG, "点击有效");
-                if(TextUtils.isEmpty(startDay)){
-                    startDay = map.get(day).getDate();
-                }else if(TextUtils.isEmpty(endDay)){
-                    endDay = map.get(day).getDate();
+                if(dateStart==null){
+                    dateStart = CalendarUtil.getDayDate(map.get(day).getDate());
+                }else if(dateEnd == null){
+                    dateEnd = CalendarUtil.getDayDate(map.get(day).getDate());
                 }
                 refreshStstus();
                 invalidate();
@@ -580,6 +594,15 @@ public class CustomCalendar extends View{
                 break;
         }
 
+    }
+
+
+    public void setEmpty(boolean all){
+        if(all)
+            dateStart = null;
+        dateEnd = null;
+        refreshStstus();
+        invalidate();
     }
 
 

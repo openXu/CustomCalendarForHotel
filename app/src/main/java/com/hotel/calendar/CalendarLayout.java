@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * autour: ox
@@ -90,11 +91,36 @@ public class CalendarLayout extends RelativeLayout {
         tv_month.setText("");
     }
 
+    /**
+     * 设置数据
+     */
     public void setData(ArrayList<MonthDayBean.MonthBean> months){
         this.months = months;
         if(months!=null) {
             refreshMonth();
         }
+    }
+
+    /**
+     * 获取选中数据
+     */
+    public ArrayList<MonthDayBean.Day> getSelectedData(){
+        Date dateStart = cal.getDateStart();
+        Date dateEnd = cal.getDateEnd();
+        if(dateEnd==null)
+            return null;
+        ArrayList<MonthDayBean.Day> selected = new ArrayList<>();
+        for(MonthDayBean.MonthBean month: months){
+            ArrayList<MonthDayBean.Day> days = month.getDays();
+            for(MonthDayBean.Day day:days){
+                Date date = CalendarUtil.getDayDate(day.getDate());
+                if(date.getTime() >= dateStart.getTime() &&
+                        date.getTime() <= dateEnd.getTime()){
+                    selected.add(day);
+                }
+            }
+        }
+        return selected;
     }
 
     private void setMonth(int add){

@@ -1,7 +1,10 @@
 package com.hotel.calendar;
 
 import android.os.Bundle;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -42,24 +45,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-
-    class DayFinish{
-        int day;
-        int all;
-        int finish;
-        public DayFinish(int day, int finish, int all) {
-            this.day = day;
-            this.all = all;
-            this.finish = finish;
+    /**获取选中日期*/
+    public void getResult(View v){
+        //得到选中的日期对象集合，注意，此集合中包含离店日期，按道理离店日期不算入住的
+        ArrayList<MonthDayBean.Day> selected = cal_layout.getSelectedData();
+        if(selected==null || selected.size()<=0){
+            ((TextView)(findViewById(R.id.tv_result))).setText("未选中");
+            return;
         }
+        selected.remove(selected.size()-1);  //移除最后一个离店日期，则是真正的预订酒店的日期
+        String text = "选中入住日期为：\n";
+        for(MonthDayBean.Day day : selected){
+            text += (day.getDate()+" \n");
+        }
+        ((TextView)(findViewById(R.id.tv_result))).setText(text);
+
     }
 
-
-
-
-
+    //测试数据
     private String testStr = "{\"code\":200," +
             "\"datas\":[" +
             "{\"month\":\"2017-03\",\"" +

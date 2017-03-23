@@ -641,5 +641,12 @@ public class CustomCalendar extends View{
         invalidate();
     }
 
+    public Date getDateStart(){
+        return dateStart;
+    }
+
+    public Date getDateEnd(){
+        return dateEnd;
+    }
 
 }

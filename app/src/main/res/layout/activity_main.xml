@@ -13,7 +13,18 @@
             android:id="@+id/cal_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            />
+            android:background="#22000000"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="getResult"
+            android:text="获取结果"/>
+        <TextView
+            android:id="@+id/tv_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="获取结果"/>
 
     </LinearLayout>
 

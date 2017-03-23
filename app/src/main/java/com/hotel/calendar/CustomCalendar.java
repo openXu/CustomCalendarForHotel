@@ -39,35 +39,33 @@ public class CustomCalendar extends View{
 
     private String TAG = "CustomCalendar";
 
-    /*颜色设置*/
+    /**星期栏字体颜色设置*/
     private int tc_week = Color.parseColor("#9e9e9d");
-
-    private int tc_day_before= Color.parseColor("#a9a9a9");   //过期
-
-    private int tc_day_out= Color.parseColor("#808080");      //已满
-    private int tc_day_click = Color.parseColor("#000000");     //可点击
-    private int tc_day_unclick = Color.parseColor("#696969");     //不可点击
-    private int tc_day_select = Color.parseColor("#ffffff");     //选中
-
+    /**日期文字各种状态下的文字颜色*/
+    private int tc_day_before= Color.parseColor("#a9a9a9");    //过期(今天之前)
+    private int tc_day_out= Color.parseColor("#808080");       //已租
+    private int tc_day_click = Color.parseColor("#000000");    //可点击
+    private int tc_day_unclick = Color.parseColor("#696969");  //不可点击
+    private int tc_day_select = Color.parseColor("#ffffff");   //选中
+    /**价格各种状态下文字颜色*/
     private int tc_money_out= Color.parseColor("#808080");       //已满
     private int tc_money_click = Color.parseColor("#000000");      //可点击
     private int tc_money_unclick = Color.parseColor("#696969");  //不可点击
     private int tc_money_select = Color.parseColor("#ffffff");     //选中
+    /**字体大小设置*/
+    private float ts_week = 13;   //星期栏字体大小
+    private float ts_day = 12;    //日期字体大小
+    private float ts_money = 10;  //价格字体大小
 
-    /*字体大小设置*/
-    private float ts_week = 13;
-    private float ts_day = 12;
-    private float ts_money = 10;
-    /*间距设置*/
-    private int weekSpac = 8;  //星期下面间距
-    private int lineSpac = 3;  //行间距
-    private int lieSpac = 3;    //列间距
-    private int textSpac = 0;   //字体上下间距
-    private int textPad = 3;    //item上下pad
+    /**间距设置dip单位*/
+    private int weekSpac = 8;   //星期栏下面的空隙
+    private int lineSpac = 3;   //日历行间距
+    private int lieSpac = 3;    //日历列间距
+    private int textSpac = 0;   //日期与价格之间的距离
+    private int textPad = 3;    //日历item中字体与背景上下的间隙
 
     private Paint mPaint;
     private Paint bgPaint;
-
     /*计算*/
     private int columnWidth;       //每列宽度
     private int weekHeight, dayHeight, moneyHeight, oneHeight;
@@ -78,6 +76,7 @@ public class CustomCalendar extends View{
     private int currentDay;
 
     private Date dateStart, dateEnd;
+    private int startDateLine, endDateLine;
 
     private int dayOfMonth;    //月份天数
     private int firstIndex;    //当月第一天位置索引
@@ -218,15 +217,15 @@ public class CustomCalendar extends View{
         for(int line = 0; line < lineNum; line++){
             if(line == 0){
                 //第一行
-                drawDayAndPre(canvas, top, firstLineNum, 0, firstIndex);
+                drawDayAndPre(canvas, line+1, top, firstLineNum, 0, firstIndex);
             }else if(line == lineNum-1){
                 //最后一行
                 top += (oneHeight+lineSpac);
-                drawDayAndPre(canvas, top, lastLineNum, firstLineNum+(line-1)*7, 0);
+                drawDayAndPre(canvas, line+1, top, lastLineNum, firstLineNum+(line-1)*7, 0);
             }else{
                 //满行
                 top += (oneHeight+lineSpac);
-                drawDayAndPre(canvas, top, 7, firstLineNum+(line-1)*7, 0);
+                drawDayAndPre(canvas, line+1, top, 7, firstLineNum+(line-1)*7, 0);
             }
         }
     }
@@ -234,14 +233,16 @@ public class CustomCalendar extends View{
     /**
      * 绘制某一行的日期
      * @param canvas
+     * @param line 行数
      * @param top 顶部坐标
      * @param count 此行需要绘制的日期数量（不一定都是7天）
      * @param overDay 已经绘制过的日期，从overDay+1开始绘制
      * @param startIndex 此行第一个日期的星期索引
      */
-    private void drawDayAndPre(Canvas canvas, int top,
+    private void drawDayAndPre(Canvas canvas, int line, int top,
                                int count, int overDay, int startIndex){
 //        Log.e(TAG, "总共"+dayOfMonth+"天  有"+lineNum+"行"+ "  已经画了"+overDay+"天,下面绘制："+count+"天");
+
         int topDay = top + textPad;
         int topMoney = topDay + dayHeight +textSpac;
 //        Log.e(TAG, "top="+top+"  textPad="+textPad+"  dayHeight="+dayHeight+"  textSpac="+textSpac);
@@ -339,12 +340,23 @@ public class CustomCalendar extends View{
                         //判断如果是开始和结束日期，通知layout显示pop
                         Date date = CalendarUtil.getDayDate(dayDate.getDate());
                         if(dateStart.getTime() == date.getTime()) {
+                            startDateLine = line;
+
                             Log.e(TAG, "显示开始气泡");
-                            layout.showPop(new PointF(left+columnWidth/2, top), 1);
+                            layout.showPop(new PointF(left+columnWidth/2, top), 1, false);
                         }
                         if(dateEnd!=null&& dateEnd.getTime() == date.getTime()){
+                            endDateLine = line;
                             Log.e(TAG, "显示结束气泡");
-                            layout.showPop(new PointF(left+columnWidth/2, top), 2);
+                            if(86400000 == (dateEnd.getTime()-dateStart.getTime()) &&
+                                    startDateLine == endDateLine){
+                                Log.i(TAG, "入住日期和离店日期紧紧挨着，并在同一行上，气泡需要换行");
+                                //入住日期和离店日期挨着的 并且 在同一行
+                                layout.showPop(new PointF(left+columnWidth/2, top+oneHeight), 2, true);
+                            }else{
+                                layout.showPop(new PointF(left+columnWidth/2, top), 2, false);
+                            }
+
                         }
                     }
                     break;
@@ -372,7 +384,6 @@ public class CustomCalendar extends View{
     }
 
 
-    boolean hasOut = false;  //是否有排满的
 
     private MonthDayBean.MonthBean monthBean;
     private Map<Integer, MonthDayBean.Day> map;
@@ -394,6 +405,7 @@ public class CustomCalendar extends View{
         invalidate();
     }
 
+    boolean beforeMonthHasOut = false;  //之前月是否有排满的
     private void refreshStstus(){
         Log.e(TAG, "刷新数据");
         Iterator<Integer> keyI = map.keySet().iterator();
@@ -421,6 +433,7 @@ public class CustomCalendar extends View{
             //已经选中了开始日期
             if(dateEnd == null){
                 //未选中结束日期
+                boolean curMonthHasOut = false;  //本月是否有排满的
                 while (keyI.hasNext()){
                     MonthDayBean.Day day =map.get(keyI.next());
                     Date date = CalendarUtil.getDayDate(day.getDate());
@@ -437,21 +450,41 @@ public class CustomCalendar extends View{
                             day.setStatus(STATUS_SELECT);
                             Log.e(TAG, day.getDate()+"是开始日期，选中");
                         }else{
-                            //开始日期之后的，如果没有排满就可点击
-                            if(!hasOut){
-                                //未过期is_buy;     //是否可买  1是0否
-                                if(day.getIs_buy() == 1){
-                                    day.setStatus(STATUS_CLICK);
-                                    Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                            if(isCurrentMonth){
+                                //本月
+                                //开始日期之后的，如果没有排满就可点击
+                                if(!curMonthHasOut){
+                                    //未过期is_buy;     //是否可买  1是0否
+                                    if(day.getIs_buy() == 1){
+                                        day.setStatus(STATUS_CLICK);
+                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                    }else{
+                                        day.setStatus(STATUS_CLICK);
+                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                        curMonthHasOut = true;
+                                        beforeMonthHasOut = true;
+                                    }
                                 }else{
-                                    day.setStatus(STATUS_CLICK);
-                                    Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
-                                    hasOut = true;
+                                    day.setStatus(STATUS_UNCLICK);
+                                    Log.w(TAG, day.getDate()+"在开始日期之后，但是之前有排满的，不可以点击"+day.getIs_buy());
                                 }
                             }else{
-                                day.setStatus(STATUS_UNCLICK);
-                                Log.w(TAG, day.getDate()+"在开始日期之后，但是之前有排满的，不可以点击"+day.getIs_buy());
+                                if(!beforeMonthHasOut){
+                                    //未过期is_buy;     //是否可买  1是0否
+                                    if(day.getIs_buy() == 1){
+                                        day.setStatus(STATUS_CLICK);
+                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                    }else{
+                                        day.setStatus(STATUS_CLICK);
+                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                        curMonthHasOut = true;
+                                    }
+                                }else{
+                                    day.setStatus(STATUS_UNCLICK);
+                                    Log.w(TAG, day.getDate()+"在开始日期之后，但是之前有排满的，不可以点击"+day.getIs_buy());
+                                }
                             }
+
                         }
                     }
                 }
@@ -601,8 +634,8 @@ public class CustomCalendar extends View{
     public void setEmpty(boolean all){
         if(all) {
             dateStart = null;
+            beforeMonthHasOut = false;
         }
-        hasOut = false;
         dateEnd = null;
         refreshStstus();
         invalidate();

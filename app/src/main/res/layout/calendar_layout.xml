@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    
+
     <LinearLayout
         android:id="@+id/ll_top"
         android:layout_width="match_parent"
@@ -58,6 +58,9 @@
         android:id="@+id/cal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="60dp"
         android:layout_below="@+id/ll_top"/>
 
 
@@ -65,40 +68,45 @@
         android:id="@+id/ll_pop_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="3dp"
         android:background="@drawable/calendar_shape_pop"
         android:gravity="center_vertical"
         android:orientation="horizontal">
-
         <TextView
-            android:id="@+id/tv_start_pop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:textColor="#ffffff"
             android:text="入住日期"/>
         <ImageView
             android:id="@+id/iv_start_cancel"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_launcher"/>
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="1dp"
+            android:src="@drawable/icon_calendar_cancel"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_pop_end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="3dp"
         android:background="@drawable/calendar_shape_pop"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/tv_end_pop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:textColor="#ffffff"
             android:text="离店日期"/>
         <ImageView
             android:id="@+id/iv_end_cancel"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_launcher"/>
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginLeft="1dp"
+            android:src="@drawable/icon_calendar_cancel"/>
     </LinearLayout>
 
 

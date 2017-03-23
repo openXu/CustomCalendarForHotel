@@ -22,7 +22,7 @@ import java.util.ArrayList;
  * version:
  * description: 自定义日历控件
  */
-public class CalendarLayout extends LinearLayout {
+public class CalendarLayout extends RelativeLayout {
 
     private String TAG = "CalendarLayout";
 
@@ -112,6 +112,9 @@ public class CalendarLayout extends LinearLayout {
     }
 
     private void refreshMonth(){
+        //切换月份时，需要隐藏气泡
+        ll_pop_start.setVisibility(View.GONE);
+        ll_pop_end.setVisibility(View.GONE);
         cal.setData(months.get(monthIndex));
         String month = months.get(monthIndex).getMonth();
         String[] months = month.split("-");
@@ -127,16 +130,41 @@ public class CalendarLayout extends LinearLayout {
         Log.v(TAG, "layoutsize变化了topHeight="+topHeight);
     }
 
-    public void showPop(PointF point, int type){
+    /**
+     * 显示气泡
+     * @param point item的坐标（相对于日历），x:item中心点   y：item的top
+     * @param type
+     * @param changeLine 换行
+     */
+    public void showPop(PointF point, int type, boolean changeLine){
         if(type==1){
             ll_pop_start.setVisibility(View.VISIBLE);
-            int popH = ll_pop_start.getHeight();
-            int popW = ll_pop_start.getWidth();
-            int x = getTop() + (int)(point.x-popW/2);
-            int y = getLeft() + (int)(point.y-popH);
+            Log.v(TAG, "顶点坐标："+point.x+"  *  "+point.y);
+            ll_pop_start.measure(0,0);
+            int popH = ll_pop_start.getMeasuredHeight();
+            int popW = ll_pop_start.getMeasuredWidth();
+            Log.v(TAG, "cal在layout坐标："+cal.getX()+"  *  "+cal.getY());
+            Log.v(TAG, "pop宽高："+popW+"  *  "+popH);
+            int x = (int)cal.getX() + (int)(point.x-popW/2);
+            int y = (int)cal.getY() + (int)(point.y-popH);
             Log.v(TAG, "显示开始气泡："+x+"  *  "+y);
+            ll_pop_start.setX(x);
+            ll_pop_start.setY(y-CalendarUtil.dip2px(getContext(),3));
         }else if(type == 2){
             ll_pop_end.setVisibility(View.VISIBLE);
+            ll_pop_end.measure(0,0);
+            int popH = ll_pop_end.getMeasuredHeight();
+            int popW = ll_pop_end.getMeasuredWidth();
+            int x = (int)cal.getX() + (int)(point.x-popW/2);
+            if(changeLine){
+                int y = (int)cal.getY() + (int)(point.y);
+                ll_pop_end.setX(x);
+                ll_pop_end.setY(y+CalendarUtil.dip2px(getContext(),3));
+            }else{
+                int y = (int)cal.getY() + (int)(point.y-popH);
+                ll_pop_end.setX(x);
+                ll_pop_end.setY(y-CalendarUtil.dip2px(getContext(),3));
+            }
         }
 
     }

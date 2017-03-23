@@ -12,7 +12,8 @@
         <com.hotel.calendar.CalendarLayout
             android:id="@+id/cal_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            />
 
     </LinearLayout>
 

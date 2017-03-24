@@ -86,7 +86,6 @@ public class CustomCalendar extends View{
 
     private CalendarLayout layout;
 
-    private String ts_date = "2017-03-25";
 
     public CustomCalendar(Context context) {
         this(context, null);
@@ -419,7 +418,6 @@ public class CustomCalendar extends View{
     private void refreshStstus(){
         Log.e(TAG, "刷新数据");
         Iterator<Integer> keyI = map.keySet().iterator();
-        if(CalendarUtil.getDayDate(new Date()).getTime()<CalendarUtil.getDayDate(ts_date).getTime()){
             if(dateStart==null){
                 Log.w(TAG, "未选中日期");
                 while (keyI.hasNext()){
@@ -538,7 +536,7 @@ public class CustomCalendar extends View{
                     }
                 }
             }
-        }
+
     }
 
 

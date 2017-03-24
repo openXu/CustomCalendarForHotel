@@ -55,6 +55,15 @@ public class CalendarUtil {
 		SimpleDateFormat df = new SimpleDateFormat(FROMAT_MONTH);
 		return df.format(month);
 	}
+	public static Date getMonthDate(String month){
+		try {
+			SimpleDateFormat df = new SimpleDateFormat(FROMAT_MONTH);
+			return df.parse(month);
+		}catch (Exception e){
+			e.printStackTrace();
+			return null;
+		}
+	}
 	public static Date str2Date(String str, String fromat){
 		try {
 			SimpleDateFormat df = new SimpleDateFormat(fromat);

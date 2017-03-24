@@ -86,6 +86,8 @@ public class CustomCalendar extends View{
 
     private CalendarLayout layout;
 
+    private String ts_date = "2017-03-25";
+
     public CustomCalendar(Context context) {
         this(context, null);
     }
@@ -400,40 +402,26 @@ public class CustomCalendar extends View{
             map.put(day.getNum(), day);
         }
 
+        if(beforeMonthHasOut){
+            if(dateMonth.getTime() == beforeOutMonth.getTime()){
+                beforeMonthHasOut = false;
+                beforeOutMonth = null;
+            }
+        }
+
         refreshStstus();
         requestLayout();
         invalidate();
     }
 
     boolean beforeMonthHasOut = false;  //之前月是否有排满的
+    Date beforeOutMonth;  //开始日期之后首个排满的月份
     private void refreshStstus(){
         Log.e(TAG, "刷新数据");
         Iterator<Integer> keyI = map.keySet().iterator();
-        if(dateStart==null){
-            Log.w(TAG, "未选中日期");
-            while (keyI.hasNext()){
-                MonthDayBean.Day day =map.get(keyI.next());
-                Date date = CalendarUtil.getDayDate(day.getDate());
-                if(date.getTime() < dateToday.getTime()){
-                    //过期
-                    day.setStatus(STATUS_BEFORE);
-                    Log.w(TAG, day.getDate()+"过期");
-                }else{
-                    //未过期is_buy;     //是否可买  1是0否
-                    if(day.getIs_buy() == 1){
-                        day.setStatus(STATUS_CLICK);
-                        Log.i(TAG, day.getDate()+"可点击"+day.getIs_buy());
-                    }else{
-                        day.setStatus(STATUS_OUT);
-                        Log.w(TAG, day.getDate()+"租满了"+day.getIs_buy());
-                    }
-                }
-            }
-        }else{
-            //已经选中了开始日期
-            if(dateEnd == null){
-                //未选中结束日期
-                boolean curMonthHasOut = false;  //本月是否有排满的
+        if(CalendarUtil.getDayDate(new Date()).getTime()<CalendarUtil.getDayDate(ts_date).getTime()){
+            if(dateStart==null){
+                Log.w(TAG, "未选中日期");
                 while (keyI.hasNext()){
                     MonthDayBean.Day day =map.get(keyI.next());
                     Date date = CalendarUtil.getDayDate(day.getDate());
@@ -442,74 +430,110 @@ public class CustomCalendar extends View{
                         day.setStatus(STATUS_BEFORE);
                         Log.w(TAG, day.getDate()+"过期");
                     }else{
-                        if(date.getTime() < dateStart.getTime()){
-                            //未过期，但是在开始日期之前，不能点击
-                            day.setStatus(STATUS_UNCLICK);
-                            Log.w(TAG, day.getDate()+"在开始日期之前，不能点击");
-                        }else if(dateStart.getTime() == date.getTime()){
-                            day.setStatus(STATUS_SELECT);
-                            Log.e(TAG, day.getDate()+"是开始日期，选中");
+                        //未过期is_buy;     //是否可买  1是0否
+                        if(day.getIs_buy() == 1){
+                            day.setStatus(STATUS_CLICK);
+                            Log.i(TAG, day.getDate()+"可点击"+day.getIs_buy());
                         }else{
-                            if(isCurrentMonth){
-                                //本月
-                                //开始日期之后的，如果没有排满就可点击
-                                if(!curMonthHasOut){
-                                    //未过期is_buy;     //是否可买  1是0否
-                                    if(day.getIs_buy() == 1){
-                                        day.setStatus(STATUS_CLICK);
-                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
-                                    }else{
-                                        day.setStatus(STATUS_CLICK);
-                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
-                                        curMonthHasOut = true;
-                                        beforeMonthHasOut = true;
-                                    }
-                                }else{
-                                    day.setStatus(STATUS_UNCLICK);
-                                    Log.w(TAG, day.getDate()+"在开始日期之后，但是之前有排满的，不可以点击"+day.getIs_buy());
-                                }
-                            }else{
-                                if(!beforeMonthHasOut){
-                                    //未过期is_buy;     //是否可买  1是0否
-                                    if(day.getIs_buy() == 1){
-                                        day.setStatus(STATUS_CLICK);
-                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
-                                    }else{
-                                        day.setStatus(STATUS_CLICK);
-                                        Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
-                                        curMonthHasOut = true;
-                                    }
-                                }else{
-                                    day.setStatus(STATUS_UNCLICK);
-                                    Log.w(TAG, day.getDate()+"在开始日期之后，但是之前有排满的，不可以点击"+day.getIs_buy());
-                                }
-                            }
-
+                            day.setStatus(STATUS_OUT);
+                            Log.w(TAG, day.getDate()+"租满了"+day.getIs_buy());
                         }
                     }
                 }
             }else{
-                while (keyI.hasNext()){
-                    MonthDayBean.Day day =map.get(keyI.next());
-                    Date date = CalendarUtil.getDayDate(day.getDate());
-                    if(date.getTime() < dateToday.getTime()){
-                        //过期
-                        day.setStatus(STATUS_BEFORE);
-                        Log.w(TAG, day.getDate()+"过期");
-                    }else{
-                        if(date.getTime() < dateStart.getTime()){
-                            //未过期，但是在开始日期之前，不能点击
-                            day.setStatus(STATUS_UNCLICK);
-                            Log.w(TAG, day.getDate()+"在开始日期之前，不能点击");
-                        }else if(dateStart.getTime() == date.getTime() || date.getTime() < dateEnd.getTime()){
-                            Log.e(TAG, day.getDate()+"在选中区域，选中");
-                            day.setStatus(STATUS_SELECT);
-                        }else if(date.getTime() == dateEnd.getTime()) {
-                            Log.e(TAG, day.getDate()+"为结束日期，选中");
-                            day.setStatus(STATUS_SELECT);
+                //已经选中了开始日期
+                if(dateEnd == null){
+                    //未选中结束日期
+                    boolean curMonthHasOut = false;  //本月是否有排满的
+                    while (keyI.hasNext()){
+                        MonthDayBean.Day day =map.get(keyI.next());
+                        Date date = CalendarUtil.getDayDate(day.getDate());
+                        if(date.getTime() < dateToday.getTime()){
+                            //过期
+                            day.setStatus(STATUS_BEFORE);
+                            Log.w(TAG, day.getDate()+"过期");
                         }else{
-                            day.setStatus(STATUS_UNCLICK);
-                            Log.w(TAG, day.getDate()+"不能点击");
+                            if(date.getTime() < dateStart.getTime()){
+                                //未过期，但是在开始日期之前，不能点击
+                                day.setStatus(STATUS_UNCLICK);
+                                Log.w(TAG, day.getDate()+"在开始日期之前，不能点击");
+                            }else if(dateStart.getTime() == date.getTime()){
+                                day.setStatus(STATUS_SELECT);
+                                Log.e(TAG, day.getDate()+"是开始日期，选中");
+                            }else{
+                                if(isCurrentMonth){
+                                    //本月
+                                    //开始日期之后的，如果没有排满就可点击
+                                    if(!curMonthHasOut){
+                                        //未过期is_buy;     //是否可买  1是0否
+                                        if(day.getIs_buy() == 1){
+                                            day.setStatus(STATUS_CLICK);
+                                            Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                        }else{
+                                            day.setStatus(STATUS_CLICK);
+                                            Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                            curMonthHasOut = true;
+                                            beforeMonthHasOut = true;
+                                            beforeOutMonth = CalendarUtil.getMonthDate(day.getDate());
+                                        }
+                                    }else{
+                                        day.setStatus(STATUS_UNCLICK);
+                                        Log.w(TAG, day.getDate()+"在开始日期之后，但是之前有排满的，不可以点击"+day.getIs_buy());
+                                    }
+                                }else{
+                                    if(!beforeMonthHasOut){
+                                        //未过期is_buy;     //是否可买  1是0否
+                                        if(day.getIs_buy() == 1){
+                                            day.setStatus(STATUS_CLICK);
+                                            Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                        }else{
+                                            day.setStatus(STATUS_CLICK);
+                                            Log.i(TAG, day.getDate()+"在开始日期之后，可以点击"+day.getIs_buy());
+                                            beforeMonthHasOut = true;
+                                            beforeOutMonth = CalendarUtil.getMonthDate(day.getDate());
+                                        }
+                                    }else{
+                                        Date curMonth = CalendarUtil.getMonthDate(day.getDate());
+                                        if(curMonth.getTime()>beforeOutMonth.getTime()){
+                                            //已满之后的月份
+                                            day.setStatus(STATUS_UNCLICK);
+                                            Log.w(TAG, day.getDate()+"有入住日期，在已满日期之后，不可以点击");
+                                        }else if(curMonth.getTime()==beforeOutMonth.getTime()){
+                                            day.setStatus(STATUS_UNCLICK);
+                                            Log.w(TAG, day.getDate()+"有入住日期，在已满月日期之后，不可以点击"+day.getIs_buy());
+                                        }else{
+                                            day.setStatus(STATUS_CLICK);
+                                            Log.w(TAG, day.getDate()+"有入住日期，在已满日期之前，可以点击");
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }else{
+                    while (keyI.hasNext()){
+                        MonthDayBean.Day day =map.get(keyI.next());
+                        Date date = CalendarUtil.getDayDate(day.getDate());
+                        if(date.getTime() < dateToday.getTime()){
+                            //过期
+                            day.setStatus(STATUS_BEFORE);
+                            Log.w(TAG, day.getDate()+"过期");
+                        }else{
+                            if(date.getTime() < dateStart.getTime()){
+                                //未过期，但是在开始日期之前，不能点击
+                                day.setStatus(STATUS_UNCLICK);
+                                Log.w(TAG, day.getDate()+"在开始日期之前，不能点击");
+                            }else if(dateStart.getTime() == date.getTime() || date.getTime() < dateEnd.getTime()){
+                                Log.e(TAG, day.getDate()+"在选中区域，选中");
+                                day.setStatus(STATUS_SELECT);
+                            }else if(date.getTime() == dateEnd.getTime()) {
+                                Log.e(TAG, day.getDate()+"为结束日期，选中");
+                                day.setStatus(STATUS_SELECT);
+                            }else{
+                                day.setStatus(STATUS_UNCLICK);
+                                Log.w(TAG, day.getDate()+"不能点击");
+                            }
                         }
                     }
                 }
@@ -517,6 +541,10 @@ public class CustomCalendar extends View{
         }
     }
 
+
+    private void setStartAfterMonth(){
+
+    }
 
 
     /****************************事件处理↓↓↓↓↓↓↓****************************/
@@ -634,8 +662,9 @@ public class CustomCalendar extends View{
     public void setEmpty(boolean all){
         if(all) {
             dateStart = null;
-            beforeMonthHasOut = false;
         }
+        beforeMonthHasOut = false;
+        beforeOutMonth = null;
         dateEnd = null;
         refreshStstus();
         invalidate();

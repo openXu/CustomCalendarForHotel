@@ -1,6 +1,6 @@
 ## 效果图：
-    ![](/icon1.png)
-    ![](/icon2.png)
+![](/icon1.png)
+![](/icon2.png)
 
 ## 使用
 
